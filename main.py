@@ -1,12 +1,14 @@
+import os
 from googletrans import Translator
 import cv2
 import pytesseract
 
 # Path to the tesseract executable if on Windows
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+if os.name == 'nt':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # noqa
 
 next_tier = 'img/total_power_required.png'
-image_path = 'img/image_es.png'
+image_path = 'img/image2.png'
 template_path = 'img/max_total_power.png'
 
 translator = Translator()
@@ -37,6 +39,7 @@ def check_sidebar(image_path):
     roi = gray_image[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
     _, thresh_roi = cv2.threshold(roi, 0, 255,
                                   cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    cv2.imwrite("roi.png", thresh_roi)
     extracted_text = translator.translate(
             pytesseract.image_to_string(thresh_roi), src='auto', dest='en'
             ).text
@@ -59,6 +62,7 @@ def extract_numbers_with_template(image_path, template_path):
 
     sidebar, sidebar_width = check_sidebar(image_path)
     if sidebar:
+        print("Sidebar detected")
         # Crop the image to exclude the sidebar from the right
         gray_image = gray_image[:, :gray_image.shape[1] - (
             sidebar_width + 300)]
