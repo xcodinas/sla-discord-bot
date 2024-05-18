@@ -8,10 +8,32 @@ if os.name == 'nt':
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # noqa
 
 next_tier = 'img/total_power_required.png'
-image_path = 'img/image2.png'
 template_path = 'img/max_total_power.png'
 
 translator = Translator()
+
+
+def match_template(image, template):
+    result = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    return max_loc, max_val
+
+
+def extract_roi(image,
+                image_to_extract,
+                template,
+                extra_width1=0,
+                extra_width2=0):
+    max_loc, max_val = match_template(image, template)
+    # Get the bounding box for the detected region
+    template_height, template_width = template.shape
+    top_left = max_loc
+    bottom_right = (top_left[0] + template_width,
+                    top_left[1] + template_height)
+
+    return image_to_extract[top_left[1]:bottom_right[1] + extra_width1,
+                            top_left[0]:bottom_right[0] + extra_width2,
+                            ], bottom_right, top_left
 
 
 def check_sidebar(image_path):
@@ -22,24 +44,10 @@ def check_sidebar(image_path):
     # Convert the main image to grayscale
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Template matching to find the region of interest
-    result = cv2.matchTemplate(
-            gray_image,
-            sidebar_template,
-            cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
-    # Get the bounding box for the detected region
-    template_height, template_width = sidebar_template.shape
-    top_left = max_loc
-    bottom_right = (top_left[0] + template_width,
-                    top_left[1] + template_height)
-
-    # Check the text in the detected region and translate it
-    roi = gray_image[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+    roi, bottom_right, top_left = extract_roi(
+            gray_image, gray_image, sidebar_template)
     _, thresh_roi = cv2.threshold(roi, 0, 255,
                                   cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    cv2.imwrite("roi.png", thresh_roi)
     extracted_text = translator.translate(
             pytesseract.image_to_string(thresh_roi), src='auto', dest='en'
             ).text
@@ -49,7 +57,7 @@ def check_sidebar(image_path):
     return False, None
 
 
-def extract_numbers_with_template(image_path, template_path):
+def extract_numbers_with_template(image_path):
     # Load the main image and the template image
     image = cv2.imread(image_path)
     template = cv2.imread(template_path, 0)
@@ -62,31 +70,16 @@ def extract_numbers_with_template(image_path, template_path):
 
     sidebar, sidebar_width = check_sidebar(image_path)
     if sidebar:
-        print("Sidebar detected")
         # Crop the image to exclude the sidebar from the right
         gray_image = gray_image[:, :gray_image.shape[1] - (
             sidebar_width + 300)]
         thresh = thresh[:, :thresh.shape[1] - (sidebar_width + 300)]
 
-    result = cv2.matchTemplate(gray_image, template, cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
-    # Get the bounding box for the detected region
-    template_height, template_width = template.shape
-    top_left = max_loc
-    bottom_right = (
-            top_left[0] + template_width, top_left[1] + template_height)
-
-    # Extract the region of interest (ROI) around the detected template
-    roi = thresh[top_left[1]:bottom_right[1],
-                 top_left[0]:bottom_right[0] + 150
-                 ]
+    roi, _, _ = extract_roi(gray_image, thresh, template, extra_width2=150)
 
     # Use pytesseract to extract text from the thresholded ROI
     custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
     extracted_text = pytesseract.image_to_string(roi, config=custom_config)
-    return extracted_text
-
-
-numbers = extract_numbers_with_template(image_path, template_path)
-print(f"Extracted Numbers: {numbers}")
+    if len(extracted_text.split(' ')) > 1:
+        return extracted_text.split(' ')[1].strip()
+    return extracted_text.strip()
