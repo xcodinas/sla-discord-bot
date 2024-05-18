@@ -27,18 +27,9 @@ jobs:
 
     - name: Install Tesseract
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget lsb-release
-        wget https://github.com/tesseract-ocr/tesseract/archive/refs/tags/5.3.4.zip
-        sudo apt-get install -y unzip
-        unzip 5.3.4.zip
-        cd tesseract-5.3.4
-        sudo apt-get install -y automake ca-certificates g++ git libtool libleptonica-dev make pkg-config
-        ./autogen.sh
-        ./configure
-        make
-        sudo make install
-        sudo ldconfig
+        add-apt-repository ppa:alex-p/tesseract-ocr5
+        apt update
+        apt install tesseract-ocr
 
     - name: Run tests
       run: |
