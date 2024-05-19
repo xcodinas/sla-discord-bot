@@ -5,6 +5,7 @@ from database import (
         get_rankings,
         get_session,
         get_user,
+        get_or_create_user,
         get_user_rank,
         get_server_config,
         update_server_config,
@@ -74,10 +75,11 @@ async def update_battlepower(ctx, image: discord.Attachment):
         return
 
     with get_session() as session:
-        user = get_user(session, interaction.user.id)
+        user = get_or_create_user(session, interaction.user)
         server_config = get_server_config(session, interaction.guild.id)
         if not server_config.data.get('battlepower_channel_id'):
-            server_config.data['battlepower_channel_id'] = 'bc-proof'
+            server_config.data[
+                    'battlepower_channel_id'] = interaction.channel.id
             update_server_config(session, server_config)
             # Object needs to be refreshed
             server_config = get_server_config(
@@ -92,8 +94,19 @@ async def update_battlepower(ctx, image: discord.Attachment):
                     text = int(text)
                 except ValueError:
                     await interaction.response.send_message(
-                            "Could not extract battlepower from image"
+                            embed=generate_embed(
+                                title="Battlepower",
+                                description="Could not extract a number from the image",  # noqa
+                                color=discord.Color.red())
                             )
+                if user.battlepower == text:
+                    await interaction.response.send_message(
+                            embed=generate_embed(
+                                title="Battlepower",
+                                description="Battlepower is already **%s**" % text,  # noqa
+                                color=discord.Color.red())
+                            )
+                    return
                 user.battlepower = text
                 role = get_closest_role(session, text)
                 if role:
@@ -114,7 +127,7 @@ async def update_battlepower(ctx, image: discord.Attachment):
                                 role.role_name,
                                 ),
                             color=discord.Color.green())
-                    await interaction.channel.send(embed=embed)
+                    await interaction.response.send_message(embed=embed)
                     return
                 embed = generate_embed(
                         title="Battlepower Updated",
@@ -124,7 +137,7 @@ async def update_battlepower(ctx, image: discord.Attachment):
                             user.battlepower,
                             ),
                         color=discord.Color.green())
-                await interaction.channel.send(embed=embed)
+                await interaction.response.send_message(embed=embed)
             session.commit()
 
 

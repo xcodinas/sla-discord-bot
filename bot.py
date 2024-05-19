@@ -8,6 +8,7 @@ from database import (
 from commands.rankings import ranking_command_setup
 from commands.config import config_command_setup
 from commands.roles import roles_command_setup
+from commands.basic import basic_command_setup
 
 
 class DiscordBot:
@@ -15,7 +16,7 @@ class DiscordBot:
         intents = discord.Intents.default()
         intents.message_content = True
 
-        self.client = commands.Bot(command_prefix='.', intents=intents)
+        self.client = commands.Bot(command_prefix='!', intents=intents)
 
         self.set_commands()
 
@@ -28,6 +29,7 @@ class DiscordBot:
         ranking_command_setup(self.client)
         config_command_setup(self.client)
         roles_command_setup(self.client)
+        basic_command_setup(self.client)
 
     def run(self):
         with get_session() as session:

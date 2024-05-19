@@ -18,7 +18,6 @@ from sqlalchemy.orm import (
         Mapped,
         mapped_column,
         )
-from sqlalchemy.sql import func
 from typing import List
 
 database_uri = os.environ.get('DATABASE_URI')

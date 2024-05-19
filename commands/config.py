@@ -20,9 +20,7 @@ async def set_battlepower_channel(ctx, channel: discord.TextChannel):
                 session, interaction.guild.id)
         server_config.data['battlepower_channel_id'] = (
                 channel.id)
-        print(server_config.data)
         update_server_config(session, server_config)
-        print('Battlepower channel set to', channel.id)
         embed = generate_embed(
                 title='Battlepower Channel Set',
                 description='Battlepower channel set to #%s' % (
