@@ -26,7 +26,7 @@ if database_uri is None:
     database_uri = 'sqlite:///database.db'
     print(f'Using default database URI: {database_uri}')
 
-engine = create_engine(os.environ.get('DATABASE_URI'))
+engine = create_engine(database_uri, echo=False)
 
 
 class Base(DeclarativeBase):
