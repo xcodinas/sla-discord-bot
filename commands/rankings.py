@@ -127,16 +127,15 @@ async def update_battlepower(ctx, image: discord.Attachment):
                                 role.role_name,
                                 ),
                             color=discord.Color.green())
-                    await interaction.response.send_message(embed=embed)
-                    return
-                embed = generate_embed(
-                        title="Battlepower Updated",
-                        description="Updated battlepower for @%s (%s) to **%s**" % (  # noqa
-                            user.username,
-                            user.name,
-                            user.battlepower,
-                            ),
-                        color=discord.Color.green())
+                else:
+                    embed = generate_embed(
+                            title="Battlepower Updated",
+                            description="Updated battlepower for @%s (%s) to **%s**" % (  # noqa
+                                user.username,
+                                user.name,
+                                user.battlepower,
+                                ),
+                            color=discord.Color.green())
                 await interaction.response.send_message(embed=embed)
             session.commit()
 
