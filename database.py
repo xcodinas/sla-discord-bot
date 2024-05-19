@@ -22,7 +22,9 @@ from typing import List
 
 database_uri = os.environ.get('DATABASE_URI')
 if database_uri is None:
-    raise ValueError('DATABASE_URI environment variable is not set')
+    print('DATABASE_URI environment variable is not set')
+    database_uri = 'sqlite:///database.db'
+    print(f'Using default database URI: {database_uri}')
 
 engine = create_engine(os.environ.get('DATABASE_URI'))
 
