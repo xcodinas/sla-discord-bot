@@ -1,14 +1,13 @@
 import discord
-import tempfile
-from ocr import extract_numbers_with_template
+from discord.ext import commands
 from database import (
-        get_user,
-        get_server_config,
-        update_user,
-        create_user,
-        update_server_config,
         get_session,
+        get_or_create_user,
+        update_user,
         )
+from commands.rankings import ranking_command_setup
+from commands.config import config_command_setup
+from commands.roles import roles_command_setup
 
 
 class DiscordBot:
@@ -16,72 +15,38 @@ class DiscordBot:
         intents = discord.Intents.default()
         intents.message_content = True
 
-        self.client = discord.Client(
-                token=token,
-                intents=intents,
-                )
+        self.client = commands.Bot(command_prefix='.', intents=intents)
+
+        self.set_commands()
 
         if not token:
             raise ValueError('Token is required')
         self.token = token
 
-    def run(self):
-        @self.client.event
-        async def on_ready():
-            print(f'Logged in as {self.client.user}')
+    def set_commands(self):
+        # Rankings
+        ranking_command_setup(self.client)
+        config_command_setup(self.client)
+        roles_command_setup(self.client)
 
-        @self.client.event
-        async def on_message(message):
-            with get_session() as session:
+    def run(self):
+        with get_session() as session:
+            @self.client.event
+            async def on_ready():
+                # Recheck if new commands are added
+                await self.client.tree.sync()
+                print(f'Logged in as {self.client.user}')
+
+            @self.client.event
+            async def on_message(message):
                 if message.author == self.client.user:
                     return
+                # If is another bot, ignore
+                if message.author.bot:
+                    return
 
-                user = get_user(session, message.author.id)
-                if not user:
-                    create_user(
-                            session,
-                            discord_id=message.author.id,
-                            username=message.author.name,
-                            name=message.author.display_name,
-                            battlepower=0,
-                            )
-                    user = get_user(session, message.author.id)
-                if user.name != message.author.display_name:
-                    user.name = message.author.display_name
-
-                server_config = get_server_config(session, message.guild.id)
-                if not server_config.data.get('battlepower_channel_name'):
-                    server_config.data['battlepower_channel_name'] = 'bc-proof'
-                    print(server_config.data)
-                    update_server_config(session, server_config)
-                    # Object needs to be refreshed
-                    server_config = get_server_config(
-                            session, message.guild.id)
-
-                if message.channel.name == server_config.data.get(
-                        'battlepower_channel_name') and message.attachments:
-                    for attachment in message.attachments:
-                        with tempfile.NamedTemporaryFile() as temp:
-                            temp.write(await attachment.read())
-                            temp.seek(0)
-                            text = extract_numbers_with_template(temp.name)
-                            try:
-                                text = int(text)
-                            except ValueError:
-                                await message.channel.send(
-                                        "Could not extract battlepower from image"  # noqa
-                                        )
-                            user.battlepower = text
-                            await message.channel.send(
-                                    "Updated battlepower for %s (@%s) to **%s**" % (  # noqa
-                                        user.name,
-                                        user.username,
-                                        user.battlepower,
-                                        )
-                                    )
-
-                if message.content == 'ping':
-                    await message.channel.send('pong')
+                user = get_or_create_user(session, message.author)
                 update_user(session, user)
+                session.commit()
 
         self.client.run(self.token)

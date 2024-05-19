@@ -34,7 +34,14 @@ Install Tesseract using the package manager:
 ```bash
 sudo apt-get update
 sudo apt-get install tesseract-ocr
+
 ```
+
+## Enviroment Variables
+
+In order to use the bot you must set the following enviroment variables:
+BOT_TOKEN=
+DATABASE_URI=
 
 ## Usage
 
@@ -48,4 +55,17 @@ python script.py
 
 ```bash
 python -m unittest discover -s tests
+```
+
+## Database
+To generate new migrations you must run the following code:
+
+```bash
+alembic revision --autogenerate -m "Migration message"
+```
+
+To upgrade the database
+
+```bash
+alembic upgrade head
 ```
