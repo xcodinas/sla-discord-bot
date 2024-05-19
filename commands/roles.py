@@ -6,6 +6,7 @@ from utils import generate_embed
 @discord.ext.commands.hybrid_command(
         name='add_battlepower_role',
         help='Add a rank to check the battlepower')
+@discord.ext.commands.has_permissions(administrator=True)
 async def add_role(ctx, dc_role: discord.Role, battlepower):
     # Get the discord server roles, search for the one with the prompt name
     # and add it to the db
@@ -28,6 +29,7 @@ async def add_role(ctx, dc_role: discord.Role, battlepower):
 @discord.ext.commands.hybrid_command(
         name='remove_battlepower_role',
         help='Remove a rank to check the battlepower')
+@discord.ext.commands.has_permissions(administrator=True)
 async def remove_role(ctx, role_name):
     # Get the discord server roles, search for the one with the prompt name
     # and remove it from the db
@@ -78,6 +80,7 @@ async def list_roles(ctx):
 @discord.ext.commands.hybrid_command(
         name='update_battlepower_role',
         help='Update a rank to check the battlepower')
+@discord.ext.commands.has_permissions(administrator=True)
 async def update_role(ctx, role_name, battlepower):
     # Get the discord server roles, search for the one with the prompt name
     # and update it in the db
