@@ -8,10 +8,10 @@ COPY . .
 
 # Install Tesseract
 RUN apt-get update -y
-RUN apt-get install software-properties-common
+RUN apt-get install -y software-properties-common
 RUN add-apt-repository ppa:alex-p/tesseract-ocr5
 RUN apt-get update
-RUN apt-get install tesseract-ocr
+RUN apt-get install -y tesseract-ocr
 
 # Install application dependencies from pypi to get latests versions
 RUN pip3 install -r requirements.txt
