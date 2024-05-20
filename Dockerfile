@@ -15,5 +15,8 @@ RUN apt-get update -y && \
 # Install application dependencies from pypi to get latest versions
 RUN pip3 install -r requirements.txt
 
-CMD ["python", "main.py"]
-EXPOSE 80/tcp
+COPY healthcheck.py .
+
+# Run both the bot and the health check server
+CMD ["sh", "-c", "python healthcheck.py & python main.py"]
+EXPOSE 8000
