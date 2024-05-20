@@ -1,5 +1,7 @@
-opencv-python
-pytesseract
-googletrans==4.0.0-rc1
-dpytest
-sqlalchemy
+alembic==1.11.3
+discord.py==2.3.2
+googletrans==4.0.0rc1
+opencv_python==4.9.0.80
+opencv_python_headless==4.9.0.80
+pytesseract==0.3.10
+SQLAlchemy==2.0.30
