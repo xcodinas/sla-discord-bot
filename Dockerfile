@@ -7,6 +7,5 @@ WORKDIR /usr/src/app
 COPY . .
 # Install application dependencies from pypi to get latests versions
 RUN pip3 install --no-cache-dir -r requirements.txt
-EXPOSE 8000
 
 CMD ["python", "main.py"]
