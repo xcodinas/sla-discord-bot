@@ -7,6 +7,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install Tesseract
+RUN apt-get update
 RUN apt-get install software-properties-common
 RUN add-apt-repository ppa:alex-p/tesseract-ocr5
 RUN apt-get update
