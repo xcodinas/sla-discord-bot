@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.10
 # Install deployment dependencies
 RUN pip3 install --no-cache-dir uwsgi psycopg2
 
@@ -6,6 +6,7 @@ RUN pip3 install --no-cache-dir uwsgi psycopg2
 WORKDIR /usr/src/app
 COPY . .
 # Install application dependencies from pypi to get latests versions
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 CMD ["python", "main.py"]
+EXPOSE 80/tcp
