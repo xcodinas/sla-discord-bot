@@ -7,9 +7,10 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install Tesseract
+RUN apt-get install software-properties-common
 RUN add-apt-repository ppa:alex-p/tesseract-ocr5
-RUN apt update
-RUN apt install tesseract-ocr
+RUN apt-get update
+RUN apt-get install tesseract-ocr
 
 # Install application dependencies from pypi to get latests versions
 RUN pip3 install -r requirements.txt
