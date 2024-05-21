@@ -9,7 +9,7 @@ COPY . .
 
 # Install Tesseract
 RUN apt-get update -y && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common libgl1-mesa-glx && \
     add-apt-repository ppa:alex-p/tesseract-ocr5 || (apt-get install -y tesseract-ocr && echo "Fallback to default repository")
 
 # Install application dependencies from pypi to get latest versions
