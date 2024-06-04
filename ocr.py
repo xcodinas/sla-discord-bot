@@ -5,7 +5,9 @@ import pytesseract
 
 # Path to the tesseract executable if on Windows
 if os.name == 'nt':
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # noqa
+    pytesseract.pytesseract.tesseract_cmd = (
+            r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+            )
 
 next_tier = 'img/total_power_required.png'
 template_path = 'img/max_total_power.png'
